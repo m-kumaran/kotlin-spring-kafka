@@ -1,0 +1,5 @@
+custom-configs:
+  auto-start: true
+
+#spring.kafka.bootstrap-servers: localhost:9092
+#spring.kafka.consumer.group-id: group-1
