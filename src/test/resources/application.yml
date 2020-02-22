@@ -1,2 +1,7 @@
 custom-configs:
   auto-start: false # we disable it otherwise spring boot wiring context test hangs waiting for kafka.
+
+kafka:
+  bootstrap-servers: localhost:9092
+  topic:
+    receiver: receiver.t

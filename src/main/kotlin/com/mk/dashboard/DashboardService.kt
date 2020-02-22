@@ -1,4 +1,4 @@
-package com.mk.springkafkakotlin
+package com.mk.dashboard
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 
 class User(val id: Long, val name: String)
-class Message(val msgType: String, val data: Any)
+class ChatMessage(val msgType: String, val data: Any)
 
 class ChatHandler : TextWebSocketHandler() {
 
@@ -32,21 +32,21 @@ class ChatHandler : TextWebSocketHandler() {
         when (json.get("type").asText()) {
             "join" -> {
                 val user = User(uids.getAndIncrement(), json.get("data").asText())
-                sessionList.put(session!!, user)
+                sessionList.put(session, user)
                 // tell this user about all other users
-                emit(session, Message("users", sessionList.values))
+                emit(session, ChatMessage("users", sessionList.values))
                 // tell all other users, about this user
-                broadcastToOthers(session, Message("join", user))
+                broadcastToOthers(session, ChatMessage("join", user))
             }
             "say" -> {
-                broadcast(Message("say", json.get("data").asText()))
+                broadcast(ChatMessage("say", json.get("data").asText()))
             }
         }
     }
 
-    fun emit(session: WebSocketSession, msg: Message) = session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(msg)))
-    fun broadcast(msg: Message) = sessionList.forEach { emit(it.key, msg) }
-    fun broadcastToOthers(me: WebSocketSession, msg: Message) = sessionList.filterNot { it.key == me }.forEach { emit(it.key, msg) }
+    fun emit(session: WebSocketSession, msg: ChatMessage) = session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(msg)))
+    fun broadcast(msg: ChatMessage) = sessionList.forEach { emit(it.key, msg) }
+    fun broadcastToOthers(me: WebSocketSession, msg: ChatMessage) = sessionList.filterNot { it.key == me }.forEach { emit(it.key, msg) }
 }
 
 @Configuration @EnableWebSocket
